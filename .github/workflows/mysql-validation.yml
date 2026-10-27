@@ -1,0 +1,49 @@
+name: MySQL project validation
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  mysql-validation:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Wait for MySQL
+        run: |
+          for i in {1..30}; do
+            if mysqladmin ping -h 127.0.0.1 -uroot -proot --silent; then exit 0; fi
+            sleep 2
+          done
+          echo "MySQL did not become ready" >&2
+          exit 1
+      - name: Create schema
+        run: mysql -h 127.0.0.1 -uroot -proot < healthcare_schema.sql
+      - name: Load fictional test records
+        run: mysql -h 127.0.0.1 -uroot -proot < healthcare_sample_data.sql
+      - name: Execute reporting queries
+        run: mysql -h 127.0.0.1 -uroot -proot --show-warnings < healthcare_queries.sql
+      - name: Assert expected demo totals
+        run: |
+          paid_revenue=$(mysql -N -h 127.0.0.1 -uroot -proot -D healthcare_analytics_practice -e "SELECT FORMAT(SUM(net_amount),2) FROM bills WHERE payment_status='Paid';")
+          patients=$(mysql -N -h 127.0.0.1 -uroot -proot -D healthcare_analytics_practice -e "SELECT COUNT(*) FROM patients;")
+          view_rows=$(mysql -N -h 127.0.0.1 -uroot -proot -D healthcare_analytics_practice -e "SELECT COUNT(*) FROM vw_doctor_revenue;")
+          test "$paid_revenue" = "7,400.00"
+          test "$patients" = "3"
+          test "$view_rows" = "3"
