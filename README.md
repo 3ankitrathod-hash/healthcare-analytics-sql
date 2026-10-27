@@ -1,75 +1,36 @@
-# Healthcare Analytics SQL
+# Healthcare Analytics SQL Project
 
-A SQL analytics project focused on turning healthcare operational data into clear, useful business insights.
+A reproducible MySQL 8 portfolio project modeling a small fictional healthcare organization and answering reporting questions about patient geography, provider experience, billing, and department revenue.
 
-> **Project status:** Repository initialized. The original SQL scripts, dataset/sample data, query outputs, and screenshots still need to be transferred and verified before this project is marked complete.
+> **Privacy:** All committed seed records are fictional. Never commit real patient, provider, or personal health information.
 
-## Project Objectives
+## Project files
+- `healthcare_schema.sql` — creates the practice database and relational tables.
+- `healthcare_sample_data.sql` — inserts fictional rows for local testing.
+- `healthcare_queries.sql` — reporting examples using filtering, joins, aggregation, conditional aggregation, and a reusable view.
+- `.github/workflows/mysql-validation.yml` — runs the schema, seed data, and queries against MySQL 8 on pushes and pull requests.
 
-- Explore patient, doctor, department, and billing data.
-- Answer practical healthcare operations questions with SQL.
-- Summarize doctor workload and department revenue.
-- Analyze bill payments by payment mode and payment status.
-- Create a reusable view for doctor-level revenue analysis.
+## Run locally
+Use a disposable MySQL 8 environment. From this directory, run:
 
-## Business Questions
-
-1. Which patients are located in Bengaluru?
-2. Which active doctors have more than 10 years of experience?
-3. How many patients are associated with each doctor?
-4. What is the total value of paid bills by payment mode?
-5. Which departments generate the highest revenue?
-6. How can doctor-level revenue be made available through a reusable SQL view?
-
-## Tools
-
-- SQL (queries, joins, aggregation, filtering, views)
-- Relational database concepts
-- Git and GitHub for version control and documentation
-
-## Repository Structure
-
-The intended structure is:
-
-```text
-healthcare-analytics-sql/
-├── README.md
-├── sql/
-│   ├── 01_patient_analysis.sql
-│   ├── 02_doctor_analysis.sql
-│   ├── 03_billing_analysis.sql
-│   └── 04_doctor_revenue_view.sql
-├── data/
-│   └── README.md
-├── outputs/
-│   └── README.md
-└── screenshots/
-    └── README.md
+```bash
+mysql -u root -p < healthcare_schema.sql
+mysql -u root -p < healthcare_sample_data.sql
+mysql -u root -p < healthcare_queries.sql
 ```
 
-The structure above is a target layout; files will be listed here once they have been added and checked.
+The scripts use the `healthcare_analytics_practice` database. The schema does not drop an existing database. The sample records are fictional and for practice only.
 
-## How to Run
+## Questions answered
+1. Which patients are listed in Bengaluru/Bangalore?
+2. Which active doctors have more than ten years of experience?
+3. How many patients are assigned to each doctor, including doctors with no patients?
+4. What paid amount is recorded by payment mode?
+5. Which departments have the highest paid revenue?
+6. What does the `vw_doctor_revenue` view report for each doctor?
 
-1. Open your SQL database tool.
-2. Create or select the Healthcare Analytics database.
-3. Load the project schema and permitted sample data.
-4. Run the SQL scripts in numerical order.
-5. Compare the results with the documented outputs.
+## Data model
+Departments, doctors, patients, appointments, bills, and medications are connected with primary and foreign keys. The sample is deliberately small and demonstrates SQL techniques; it is not representative of a real healthcare provider.
 
-> Update these steps with the exact database engine and setup commands once the original project files are transferred.
-
-## Data Privacy
-
-Use fictional, synthetic, or properly anonymized sample records only. Do not commit real patient information, credentials, connection strings, or other sensitive data to this public repository.
-
-## Results and Visual Evidence
-
-Query results and screenshots will be added after the original project files are transferred and the queries are re-run. No results are claimed in this README until they have been verified.
-
-## Author
-
-**Ankit Rathod**  
-Aspiring Data Analyst | SQL • Python • Excel • Power BI
-
-- GitHub: [@3ankitrathod-hash](https://github.com/3ankitrathod-hash)
+## Validation
+GitHub Actions attempts to create the schema, load the fictional seed records, execute the reporting queries, and assert selected totals. Check the Actions tab for the actual result. Passing automated SQL checks verifies reproducibility only, not clinical or operational validity.
